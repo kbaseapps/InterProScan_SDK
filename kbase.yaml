@@ -1,0 +1,15 @@
+module-name:
+    InterProScan_SDK
+
+module-description:
+    A wrap of the InterProScan annotation method
+
+service-language:
+    perl
+
+module-version:
+    0.0.1
+
+owners:
+    [janakakbase,fangfang,chenry]
+
