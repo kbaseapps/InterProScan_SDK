@@ -109,7 +109,7 @@ sub func_annotate_genome_with_interpro_pipeline {
     my $wsClient = Bio::KBase::workspace::Client->new($self->{'workspace-url'},token=>$self->util_token());
     my $genome = $wsClient->get_objects([{workspace=>$params->{genome_workspace},name=>$params->{genome_id}}])->[0]{data};
     #Step 2: Print protein FASTA file
-    File::Path::mkpath $self->util_scratchdir()
+    File::Path::mkpath $self->util_scratchdir();
     my $filename = $self->util_scratchdir()."/protein.fa";
     open ( my $fh, ">", $filename) || $self->util_error("Failure to open file: $filename, $!");
     my $genehash = {};
@@ -160,18 +160,18 @@ sub func_annotate_genome_with_interpro_pipeline {
 		for (my $k=0; $k < @{$ftr->{ontology_terms}->{InterPro}->{$array->[11]}->{evidence}}; $k++) {
 			if ($ftr->{ontology_terms}->{InterPro}->{$array->[11]}->{evidence}->[$k]->{method} eq $annofunc) {
 				$ftr->{ontology_terms}->{InterPro}->{$array->[11]}->{evidence}->[$k]->{timestamp} = $timestamp;
-				$ftr->{ontology_terms}->{InterPro}->{$array->[11]}->{evidence}->[$k]->{method_version} = $version;
+				$ftr->{ontology_terms}->{InterPro}->{$array->[11]}->{evidence}->[$k]->{method_version} = $self->version();
 				$ftr->{ontology_terms}->{InterPro}->{$array->[11]}->{evidence}->[$k]->{alignment_evidence} = [[$array->[6],$array->[7],abs($array->[7]-$array->[6]),$array->[8]]];
 				$found = 1;
 				last;
 			}
 		}
 		if ($found == 0) {
-			push(@{$ftr->{ontology_terms}->{SSO}->{$funchash->{$rolename}->{id}}->{evidence}},{
+			push(@{$ftr->{ontology_terms}->{InterPro}->{$array->[11]}->{evidence}},{
 				method => $annofunc,
 				method_version => $self->version,
 				timestamp => $timestamp,
-				$ftr->{ontology_terms}->{InterPro}->{$array->[11]}->{evidence}->[$k]->{alignment_evidence} = [[$array->[6],$array->[7],abs($array->[7]-$array->[6]),$array->[8]]];
+				alignment_evidence => [[$array->[6],$array->[7],abs($array->[7]-$array->[6]),$array->[8]]]
 			});
 		}
     }
@@ -203,7 +203,7 @@ sub func_annotate_genome_with_interpro_pipeline {
     });
    	return {
 		report_name => $params->{genome_output_id}.".annotate_genome_with_interpro_pipeline.report",
-		report_ref => $params->{workspace}.'/'.$params->{genome_output_id}.".annotate_genome_with_interpro_pipeline.report";
+		report_ref => $params->{workspace}.'/'.$params->{genome_output_id}.".annotate_genome_with_interpro_pipeline.report"
 	};
 }
 #END_HEADER
