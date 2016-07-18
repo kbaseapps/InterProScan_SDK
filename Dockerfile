@@ -28,6 +28,8 @@ WORKDIR /kb/module
 
 RUN make
 
+RUN rm -rf /kb/runtime/java
+
 ENTRYPOINT [ "./scripts/entrypoint.sh" ]
 
 CMD [ ]
