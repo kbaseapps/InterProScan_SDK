@@ -160,7 +160,7 @@ sub func_annotate_genome_with_interpro_pipeline {
 		for (my $k=0; $k < @{$ftr->{ontology_terms}->{InterPro}->{$array->[11]}->{evidence}}; $k++) {
 			if ($ftr->{ontology_terms}->{InterPro}->{$array->[11]}->{evidence}->[$k]->{method} eq $annofunc) {
 				$ftr->{ontology_terms}->{InterPro}->{$array->[11]}->{evidence}->[$k]->{timestamp} = $timestamp;
-				$ftr->{ontology_terms}->{InterPro}->{$array->[11]}->{evidence}->[$k]->{method_version} = $self->version();
+				$ftr->{ontology_terms}->{InterPro}->{$array->[11]}->{evidence}->[$k]->{method_version} = $VERSION;
 				$ftr->{ontology_terms}->{InterPro}->{$array->[11]}->{evidence}->[$k]->{alignment_evidence} = [[$array->[6],$array->[7],abs($array->[7]-$array->[6]),$array->[8]]];
 				$found = 1;
 				last;
