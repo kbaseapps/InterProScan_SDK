@@ -123,9 +123,8 @@ sub func_annotate_genome_with_interpro_pipeline {
     #Step 3: Run interpro
     my $orig_cwd = cwd;
     chdir $self->util_scratchdir();
-    system("ls -la /data/interproscan/");
-    system("interproscan.sh --help");
-    system("interproscan.sh -i protein.fa -f tsv -o protein.tsv --disable-precalc -iprscan -iprlookup -hm");
+    system("/data/interproscan/interproscan.sh -i ".$self->util_scratchdir()."/protein.fa -f tsv -o ".$self->util_scratchdir()."/protein.tsv --disable-precalc -iprscan -iprlookup -hm");
+    system("ls -la ".$self->util_scratchdir()."/");
     chdir $orig_cwd;
     #Step 4: Parsing interpro results
     $filename = $self->util_scratchdir()."/protein.tsv";
