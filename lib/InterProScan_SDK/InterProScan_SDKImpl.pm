@@ -123,8 +123,6 @@ sub func_annotate_genome_with_interpro_pipeline {
     #Step 3: Run interpro
     my $orig_cwd = cwd;
     chdir $self->util_scratchdir();
-    system("java -version");
-	system("which java");
     system("/data/interproscan/interproscan.sh -i ".$self->util_scratchdir()."/protein.fa -f tsv -o ".$self->util_scratchdir()."/protein.tsv --disable-precalc -iprscan -iprlookup -hm");
     chdir $orig_cwd;
     #Step 4: Parsing interpro results
@@ -171,7 +169,7 @@ sub func_annotate_genome_with_interpro_pipeline {
 		if ($found == 0) {
 			push(@{$ftr->{ontology_terms}->{InterPro}->{$array->[11]}->{evidence}},{
 				method => $annofunc,
-				method_version => $self->version,
+				method_version => $VERSION,
 				timestamp => $timestamp,
 				alignment_evidence => [[$array->[6],$array->[7],abs($array->[7]-$array->[6]),$array->[8]]]
 			});
