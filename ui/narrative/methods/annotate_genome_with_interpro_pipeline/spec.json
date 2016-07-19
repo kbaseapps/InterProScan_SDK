@@ -72,7 +72,7 @@
                     "target_property": "workspace_name"
                 },
                 {
-          			"input_parameter": "output_genome",
+          			"input_parameter": "genome_output_id",
           			"target_property": "id"
         		},
         		{
