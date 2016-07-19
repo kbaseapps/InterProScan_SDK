@@ -187,7 +187,7 @@ sub func_annotate_genome_with_interpro_pipeline {
 		}]
 	});
     my $reportObj = {
-		'objects_created' => [$info->[6]."/".$info->[0]."/".$info->[4]],
+		'objects_created' => [],
 		'text_message' => $numftr." annotated with ".$numdomains." distinct interpro domains by interpro scan!"
 	};
     $info = $wsClient->save_objects({
