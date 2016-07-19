@@ -161,7 +161,7 @@ sub func_annotate_genome_with_interpro_pipeline {
 			if ($ftr->{ontology_terms}->{InterPro}->{$array->[11]}->{evidence}->[$k]->{method} eq $annofunc) {
 				$ftr->{ontology_terms}->{InterPro}->{$array->[11]}->{evidence}->[$k]->{timestamp} = $timestamp;
 				$ftr->{ontology_terms}->{InterPro}->{$array->[11]}->{evidence}->[$k]->{method_version} = $VERSION;
-				$ftr->{ontology_terms}->{InterPro}->{$array->[11]}->{evidence}->[$k]->{alignment_evidence} = [[$array->[6],$array->[7],abs($array->[7]-$array->[6]),$array->[8]]];
+				$ftr->{ontology_terms}->{InterPro}->{$array->[11]}->{evidence}->[$k]->{alignment_evidence} = [[$array->[6]+0,$array->[7]+0,abs($array->[7]-$array->[6]),$array->[8]+0]];
 				$found = 1;
 				last;
 			}
@@ -171,7 +171,7 @@ sub func_annotate_genome_with_interpro_pipeline {
 				method => $annofunc,
 				method_version => $VERSION,
 				timestamp => $timestamp,
-				alignment_evidence => [[$array->[6],$array->[7],abs($array->[7]-$array->[6]),$array->[8]]]
+				alignment_evidence => [[$array->[6]+0,$array->[7]+0,abs($array->[7]-$array->[6]),$array->[8]+0]]
 			});
 		}
     }
