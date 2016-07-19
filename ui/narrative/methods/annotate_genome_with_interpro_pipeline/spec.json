@@ -70,7 +70,15 @@
                 {
                     "narrative_system_variable": "workspace",
                     "target_property": "workspace_name"
-                }
+                },
+                {
+          			"input_parameter": "output_genome",
+          			"target_property": "id"
+        		},
+        		{
+          			"narrative_system_variable": "workspace",
+					"target_property": "ws"
+        		}
             ]
         }
     },
