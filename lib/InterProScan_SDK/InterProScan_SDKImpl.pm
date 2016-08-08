@@ -22,6 +22,7 @@ use Config::IniFiles;
 use Data::Dumper;
 use File::Path;
 use DateTime;
+use JSON::XS;
 use Cwd;
 our $currentcontext;
 
@@ -63,7 +64,7 @@ sub util_to_fasta {
 
 sub util_scratchdir {
 	my ($self) = @_;
-	return $self->{_scratchdir};
+	return $self->{scratch};
 }
 
 sub util_validate_args {
@@ -98,6 +99,37 @@ sub util_validate_args {
 	return $args;
 }
 
+sub util_configure_ws_id {
+	my ($self,$ws,$id) = @_;
+	my $input = {};
+ 	if ($ws =~ m/^\d+$/) {
+ 		$input->{wsid} = $ws;
+	} else {
+		$input->{workspace} = $ws;
+	}
+	if ($id =~ m/^\d+$/) {
+		$input->{objid} = $id;
+	} else {
+		$input->{name} = $id;
+	}
+	return $input;
+}
+
+sub util_runexecutable {
+	my ($self,$Command) = @_;
+	my $OutputArray;
+	push(@{$OutputArray},`$Command`);
+	return $OutputArray;
+}
+
+sub util_from_json {
+	my ($self,$data) = @_;
+    if (!defined($data)) {
+    	die "Data undefined!";
+    }
+    return decode_json $data;
+}
+
 sub func_annotate_genome_with_interpro_pipeline {
 	my ($self,$params) = @_;
     $params = $self->util_validate_args($params,["workspace","genome_id","genome_output_id"],{
@@ -107,7 +139,20 @@ sub func_annotate_genome_with_interpro_pipeline {
   	my $timestamp = DateTime->now()->datetime();
     #Step 1: Get genome from workspace
     my $wsClient = Bio::KBase::workspace::Client->new($self->{'workspace-url'},token=>$self->util_token());
-    my $genome = $wsClient->get_objects([{workspace=>$params->{genome_workspace},name=>$params->{genome_id}}])->[0]{data};
+    my $info_array = $wsClient->get_object_info([$self->util_configure_ws_id($params->{genome_workspace},$params->{genome_id})],0);
+	my $info = $info_array->[0];	
+	my $genome;
+	if ($info->[2] =~ /GenomeAnnotation/) {
+		my $output = $self->util_runexecutable($self->{"Data_API_script_directory"}.'get_genome.py "'.$self->{'workspace-url'}.'" "'.$self->{'shock-url'}.'" "'.$self->{"handle-service-url"}.'" "'.$self->token().'" "'.$info->[6]."/".$info->[0]."/".$info->[4].'" "'.$info->[1].'" 1');
+		my $last = pop(@{$output});
+		if ($last !~ m/SUCCESS/) {
+			die "Genome failed to load!";
+		}
+		$genome = $self->util_from_json(pop(@{$output}));
+		delete $genome->{contigobj};
+	} else {
+		$genome=$wsClient->get_objects([$self->util_configure_ws_id($params->{genome_workspace},$params->{genome_id})])->[0]{data};
+	}
     #Step 2: Print protein FASTA file
     File::Path::mkpath $self->util_scratchdir();
     my $filename = $self->util_scratchdir()."/protein.fa";
@@ -218,9 +263,16 @@ sub new
     my $config_file = $ENV{ KB_DEPLOYMENT_CONFIG };
     my $cfg = Config::IniFiles->new(-file=>$config_file);
     my $wsInstance = $cfg->val('InterProScan_SDK','workspace-url');
-    $self->{_scratchdir} = $cfg->val('InterProScan_SDK','scratch');
-    die "no workspace-url defined" unless $wsInstance;
-    $self->{'workspace-url'} = $wsInstance;
+    $self->{'kbase-endpoint'} = $cfg->val('sdk_ontology','kbase-endpoint');
+    $self->{'workspace-url'} = $cfg->val('sdk_ontology','workspace-url');
+    $self->{'job-service-url'} = $cfg->val('sdk_ontology','job-service-url');
+    $self->{'shock-url'} = $cfg->val('sdk_ontology','shock-url');
+    $self->{'handle-service-url'} = $cfg->val('sdk_ontology','handle-service-url');
+    $self->{'scratch'} = $cfg->val('sdk_ontology','scratch');
+    $self->{'Data_API_script_directory'} = $cfg->val('sdk_ontology','Data_API_script_directory');
+	if (!defined($self->{'workspace-url'})) {
+		die "no workspace-url defined";
+	}
     #END_CONSTRUCTOR
 
     if ($self->can('_init_instance'))
