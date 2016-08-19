@@ -262,14 +262,13 @@ sub new
     #BEGIN_CONSTRUCTOR
     my $config_file = $ENV{ KB_DEPLOYMENT_CONFIG };
     my $cfg = Config::IniFiles->new(-file=>$config_file);
-    my $wsInstance = $cfg->val('InterProScan_SDK','workspace-url');
-    $self->{'kbase-endpoint'} = $cfg->val('sdk_ontology','kbase-endpoint');
-    $self->{'workspace-url'} = $cfg->val('sdk_ontology','workspace-url');
-    $self->{'job-service-url'} = $cfg->val('sdk_ontology','job-service-url');
-    $self->{'shock-url'} = $cfg->val('sdk_ontology','shock-url');
-    $self->{'handle-service-url'} = $cfg->val('sdk_ontology','handle-service-url');
-    $self->{'scratch'} = $cfg->val('sdk_ontology','scratch');
-    $self->{'Data_API_script_directory'} = $cfg->val('sdk_ontology','Data_API_script_directory');
+    $self->{'kbase-endpoint'} = $cfg->val('InterProScan_SDK','kbase-endpoint');
+    $self->{'workspace-url'} = $cfg->val('InterProScan_SDK','workspace-url');
+    $self->{'job-service-url'} = $cfg->val('InterProScan_SDK','job-service-url');
+    $self->{'shock-url'} = $cfg->val('InterProScan_SDK','shock-url');
+    $self->{'handle-service-url'} = $cfg->val('InterProScan_SDK','handle-service-url');
+    $self->{'scratch'} = $cfg->val('InterProScan_SDK','scratch');
+    $self->{'Data_API_script_directory'} = $cfg->val('InterProScan_SDK','Data_API_script_directory');
 	if (!defined($self->{'workspace-url'})) {
 		die "no workspace-url defined";
 	}
