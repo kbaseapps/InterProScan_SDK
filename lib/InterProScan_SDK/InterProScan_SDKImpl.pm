@@ -143,7 +143,7 @@ sub func_annotate_genome_with_interpro_pipeline {
 	my $info = $info_array->[0];	
 	my $genome;
 	if ($info->[2] =~ /GenomeAnnotation/) {
-		my $output = $self->util_runexecutable($self->{"Data_API_script_directory"}.'get_genome.py "'.$self->{'workspace-url'}.'" "'.$self->{'shock-url'}.'" "'.$self->{"handle-service-url"}.'" "'.$self->token().'" "'.$info->[6]."/".$info->[0]."/".$info->[4].'" "'.$info->[1].'" 1');
+		my $output = $self->util_runexecutable($self->{"Data_API_script_directory"}.'get_genome.py "'.$self->{'workspace-url'}.'" "'.$self->{'shock-url'}.'" "'.$self->{"handle-service-url"}.'" "'.$self->util_token().'" "'.$info->[6]."/".$info->[0]."/".$info->[4].'" "'.$info->[1].'" 1');
 		my $last = pop(@{$output});
 		if ($last !~ m/SUCCESS/) {
 			die "Genome failed to load!";
