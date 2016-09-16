@@ -18,6 +18,7 @@ A KBase module: InterProScan_SDK
 #BEGIN_HEADER
 use Bio::KBase::AuthToken;
 use Bio::KBase::workspace::Client;
+use GenomeAnnotationAPI::GenomeAnnotationAPIClient;
 use Config::IniFiles;
 use Data::Dumper;
 use File::Path;
@@ -130,6 +131,27 @@ sub util_from_json {
     return decode_json $data;
 }
 
+sub util_get_genome {
+	my ($self,$ref) = @_;
+	my $output = $self->util_ga_client()->get_genome_v1({
+		genomes => [{
+			"ref" => $ref
+		}],
+		ignore_errors => 1,
+		no_data => 0,
+		no_metadata => 1
+	});
+	return $output->{genomes}->[0]->{data};
+}
+
+sub util_ga_client {
+	my ($self,$input) = @_;
+	if (!defined($self->{_gaclient})) {
+		$self->{_gaclient} = new GenomeAnnotationAPI::GenomeAnnotationAPIClient($ENV{ SDK_CALLBACK_URL });
+	}
+	return $self->{_gaclient};
+}
+
 sub func_annotate_genome_with_interpro_pipeline {
 	my ($self,$params) = @_;
     $params = $self->util_validate_args($params,["workspace","genome_id","genome_output_id"],{
@@ -139,20 +161,7 @@ sub func_annotate_genome_with_interpro_pipeline {
   	my $timestamp = DateTime->now()->datetime();
     #Step 1: Get genome from workspace
     my $wsClient = Bio::KBase::workspace::Client->new($self->{'workspace-url'},token=>$self->util_token());
-    my $info_array = $wsClient->get_object_info([$self->util_configure_ws_id($params->{genome_workspace},$params->{genome_id})],0);
-	my $info = $info_array->[0];	
-	my $genome;
-	if ($info->[2] =~ /GenomeAnnotation/) {
-		my $output = $self->util_runexecutable($self->{"Data_API_script_directory"}.'get_genome.py "'.$self->{'workspace-url'}.'" "'.$self->{'shock-url'}.'" "'.$self->{"handle-service-url"}.'" "'.$self->util_token().'" "'.$info->[6]."/".$info->[0]."/".$info->[4].'" "'.$info->[1].'" 1');
-		my $last = pop(@{$output});
-		if ($last !~ m/SUCCESS/) {
-			die "Genome failed to load!";
-		}
-		$genome = $self->util_from_json(pop(@{$output}));
-		delete $genome->{contigobj};
-	} else {
-		$genome=$wsClient->get_objects([$self->util_configure_ws_id($params->{genome_workspace},$params->{genome_id})])->[0]{data};
-	}
+    my $genome = $self->util_get_genome($params->{genome_workspace}."/".$params->{genome_id});
     #Step 2: Print protein FASTA file
     File::Path::mkpath $self->util_scratchdir();
     my $filename = $self->util_scratchdir()."/protein.fa";
@@ -223,20 +232,18 @@ sub func_annotate_genome_with_interpro_pipeline {
     }
     close($fh);
     #Step 5: Saving the genome and report
-    my $info = $wsClient->save_objects({
-		'workspace'=>$params->{workspace},
-		'objects'=>[{
-			'type'=>'KBaseGenomes.Genome',
-			'data'=>$genome,
-			'name'=>$params->{genome_output_id},
-			'provenance'=>$self->util_provenance()
-		}]
+    my $gaoutput = $self->util_ga_client()->save_one_genome_v1({
+		workspace => $parameters->{workspace},
+        name => $params->{genome_output_id},
+        data => $genome,
+        provenance => $self->util_provenance(),
+        hidden => 0
 	});
     my $reportObj = {
 		'objects_created' => [],
 		'text_message' => $numftr." annotated with ".$numdomains." distinct interpro domains by interpro scan!"
 	};
-    $info = $wsClient->save_objects({
+    my $info = $wsClient->save_objects({
     	workspace => $params->{workspace},
     	objects => [{
     		type => "KBaseReport.Report",
@@ -269,8 +276,7 @@ sub new
     $self->{'shock-url'} = $cfg->val('InterProScan_SDK','shock-url');
     $self->{'handle-service-url'} = $cfg->val('InterProScan_SDK','handle-service-url');
     $self->{'scratch'} = $cfg->val('InterProScan_SDK','scratch');
-    $self->{'Data_API_script_directory'} = $cfg->val('InterProScan_SDK','Data_API_script_directory');
-	if (!defined($self->{'workspace-url'})) {
+    if (!defined($self->{'workspace-url'})) {
 		die "no workspace-url defined";
 	}
     #END_CONSTRUCTOR
