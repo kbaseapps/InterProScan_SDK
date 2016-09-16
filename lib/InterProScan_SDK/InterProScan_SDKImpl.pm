@@ -233,7 +233,7 @@ sub func_annotate_genome_with_interpro_pipeline {
     close($fh);
     #Step 5: Saving the genome and report
     my $gaoutput = $self->util_ga_client()->save_one_genome_v1({
-		workspace => $parameters->{workspace},
+		workspace => $params->{workspace},
         name => $params->{genome_output_id},
         data => $genome,
         provenance => $self->util_provenance(),
