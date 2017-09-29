@@ -5,6 +5,8 @@ name: Annotate Genome with InterproScan
 tooltip: |
     Annotates protein sequences in a genome with InterPro entries using the InterProScan pipeline.
 
+screenshots : []
+
 icon: icon.png
 
 #
